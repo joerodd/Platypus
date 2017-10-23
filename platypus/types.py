@@ -21,6 +21,7 @@ from __future__ import absolute_import, division, print_function
 import copy
 import math
 import random
+import numpy as np
 from abc import ABCMeta, abstractmethod
 from .tools import bin2gray, bin2int, int2bin, gray2bin
 
@@ -53,6 +54,23 @@ class Real(Type):
         
     def __str__(self):
         return "Real(%f, %f)" % (self.min_value, self.max_value)
+
+
+class Real_T(Type):
+    def __init__(self, min_value, max_value, default_value):
+        super(Real_T, self).__init__()
+        self.min_value = float(min_value)
+        self.max_value = float(max_value)
+        self.default_value = float(default_value)
+
+    def rand(self):
+        value = np.random.standard_t(df=5) + self.default_value
+        value = max([value, self.min_value])
+        value = min([value, self.max_value])
+        return value
+
+    def __str__(self):
+        return "Real_T(%f, %f)" % (self.min_value, self.max_value, self.default_value)
         
 class Binary(Type):
     
