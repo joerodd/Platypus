@@ -25,6 +25,9 @@ from .core import PlatypusError, Solution, ParetoDominance, Generator, Selector,
 from .types import Real, Binary, Permutation, Subset, Real_Normal, Real_T
 from .tools import add, subtract, multiply, is_zero, magnitude, orthogonalize, normalize, random_vector, zeros, roulette
 
+import logging
+logger = logging.getLogger('optimum_logger')
+
 def clip(value, min_value, max_value):
     return max(min_value, min(value, max_value))
 
@@ -109,6 +112,7 @@ class SBX(Variator):
         self.distribution_index = distribution_index
          
     def evolve(self, parents):
+        logger.info("evolve")
         child1 = copy.deepcopy(parents[0])
         child2 = copy.deepcopy(parents[1])
         
