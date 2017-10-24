@@ -56,6 +56,24 @@ class Real(Type):
         return "Real(%f, %f)" % (self.min_value, self.max_value)
 
 
+class Real_Normal(Type):
+    def __init__(self, min_value, max_value, default_value, spread=5):
+        super(Real_Normal, self).__init__()
+        self.min_value = float(min_value)
+        self.max_value = float(max_value)
+        self.default_value = float(default_value)
+        self.spread = spread
+
+    def rand(self):
+        value = float(np.random.normal(self.default_value, self.spread, 1))
+        value = max([value, self.min_value])
+        value = min([value, self.max_value])
+        return value
+
+    def __str__(self):
+        return "Real_Normal(%f, %f, %f, %f)" % (self.min_value, self.max_value, self.default_value, self.spread)
+
+
 class Real_T(Type):
     def __init__(self, min_value, max_value, default_value):
         super(Real_T, self).__init__()
@@ -71,7 +89,8 @@ class Real_T(Type):
 
     def __str__(self):
         return "Real_T(%f, %f)" % (self.min_value, self.max_value, self.default_value)
-        
+
+
 class Binary(Type):
     
     def __init__(self, nbits):

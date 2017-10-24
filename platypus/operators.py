@@ -22,7 +22,7 @@ import copy
 import math
 import random
 from .core import PlatypusError, Solution, ParetoDominance, Generator, Selector, Variator, Mutation, EPSILON
-from .types import Real, Binary, Permutation, Subset, Real_T
+from .types import Real, Binary, Permutation, Subset, Real_Normal, Real_T
 from .tools import add, subtract, multiply, is_zero, magnitude, orthogonalize, normalize, random_vector, zeros, roulette
 
 def clip(value, min_value, max_value):
@@ -70,7 +70,7 @@ class PM(Mutation):
         probability = self.probability
         
         if isinstance(probability, int):
-            probability /= float(len([t for t in problem.types if isinstance(t, Real) or isinstance(t, Real_T)]))
+            probability /= float(len([t for t in problem.types if isinstance(t, Real) or isinstance(t, Real_Normal) or isinstance(t, Real_T)]))
             
         for i in range(len(child.variables)):
             if isinstance(problem.types[i], Real):
