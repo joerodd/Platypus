@@ -76,7 +76,7 @@ class PM(Mutation):
             probability /= float(len([t for t in problem.types if isinstance(t, Real) or isinstance(t, Real_Normal) or isinstance(t, Real_T)]))
             
         for i in range(len(child.variables)):
-            if isinstance(problem.types[i], Real):
+            if isinstance(problem.types[i], Real) or isinstance(problem.types[i], Real_Normal) or isinstance(problem.types[i], Real_T):
                 if random.uniform(0.0, 1.0) <= probability:
                     child.variables[i] = self.pm_mutation(float(child.variables[i]),
                                                           problem.types[i].min_value,
@@ -121,7 +121,7 @@ class SBX(Variator):
             nvars = problem.nvars
             
             for i in range(nvars):
-                if isinstance(problem.types[i], Real):
+                if isinstance(problem.types[i], Real) or isinstance(problem.types[i], Real_Normal) or isinstance(problem.types[i], Real_T):
                     if random.uniform(0.0, 1.0) <= 0.5:
                         x1 = float(child1.variables[i])
                         x2 = float(child2.variables[i])
@@ -318,10 +318,10 @@ class UM(Mutation):
         probability = self.probability
         
         if isinstance(probability, int):
-            probability /= float(len([t for t in problem.types if isinstance(t, Real)]))
+            probability /= float(len([t for t in problem.types if isinstance(t, Real) or isinstance(t, Real_Normal) or isinstance(t, Real_T)]))
         
         for i in range(len(child.variables)):
-            if isinstance(problem.types[i], Real):
+            if isinstance(problem.types[i], Real) or isinstance(problem.types[i], Real_Normal) or isinstance(problem.types[i], Real_T):
                 if random.uniform(0.0, 1.0) <= self.probability:
                     child.variables[i] = self.um_mutation(float(child.variables[i]),
                                                           problem.types[i].min_value,
