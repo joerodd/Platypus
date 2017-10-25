@@ -70,8 +70,6 @@ class PM(Mutation):
     def mutate(self, parent):
         logger.info("mutate")
         child = copy.deepcopy(parent)
-        child.parent0 = parent.fingerprint
-        child.parent1 = "mutation"
         problem = child.problem
         probability = self.probability
         
