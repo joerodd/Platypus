@@ -383,6 +383,10 @@ class Solution(object):
         self.constraints = FixedLengthArray(problem.nconstrs)
         self.constraint_violation = 0.0
         self.evaluated = False
+        self.generation = 0
+        self.fingerprint = "unevaluated"
+        self.parent0 = "spawn"
+        self.parent1 = "spawn"
         
     def evaluate(self):
         self.problem(self)

@@ -68,7 +68,10 @@ class PM(Mutation):
         self.distribution_index = distribution_index
         
     def mutate(self, parent):
+        logger.info("mutate")
         child = copy.deepcopy(parent)
+        child.parent0 = parent.fingerprint
+        child.parent1 = "mutation"
         problem = child.problem
         probability = self.probability
         
@@ -134,6 +137,12 @@ class SBX(Variator):
                         child2.variables[i] = x2
                         child1.evaluated = False
                         child2.evaluated = False
+            child1.generation += 1
+            child2.generation += 1
+            child1.parent0 = parents[0].fingerprint
+            child1.parent1 = parents[1].fingerprint
+            child2.parent1 = parents[0].fingerprint
+            child2.parent0 = parents[1].fingerprint
                     
         return [child1, child2]
                     
