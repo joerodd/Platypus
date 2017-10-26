@@ -45,6 +45,9 @@ try:
     set
 except NameError:
     from sets import Set as set
+
+import logging
+logger = logging.getLogger('optimum_logger')
             
 class AbstractGeneticAlgorithm(Algorithm):
     
@@ -60,6 +63,7 @@ class AbstractGeneticAlgorithm(Algorithm):
         self.result = []
         
     def step(self):
+        logger.info("nfe = " + str(self.nfe))
         if self.nfe == 0:
             self.initialize()
             self.result = self.population
