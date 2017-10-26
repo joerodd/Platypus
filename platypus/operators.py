@@ -90,19 +90,19 @@ class PM(Mutation):
     def pm_mutation(self, x, lb, ub):
         u = random.uniform(0, 1)
         dx = ub - lb
-        
-        if u < 0.5:
-            bl = (x - lb) / dx
-            b = 2.0*u + (1.0 - 2.0*u)*pow(1.0 - bl, self.distribution_index + 1.0)
-            delta = pow(b, 1.0 / (self.distribution_index + 1.0)) - 1.0
-        else:
-            bu = (ub - x) / dx
-            b = 2.0*(1.0 - u) + 2.0*(u - 0.5)*pow(1.0 - bu, self.distribution_index + 1.0)
-            delta = 1.0 - pow(b, 1.0 / (self.distribution_index + 1.0))
-            
-        x = x + delta*dx
-        x = clip(x, lb, ub)
-            
+
+        if dx > EPSILON:
+            if u < 0.5:
+                bl = (x - lb) / dx
+                b = 2.0*u + (1.0 - 2.0*u)*pow(1.0 - bl, self.distribution_index + 1.0)
+                delta = pow(b, 1.0 / (self.distribution_index + 1.0)) - 1.0
+            else:
+                bu = (ub - x) / dx
+                b = 2.0*(1.0 - u) + 2.0*(u - 0.5)*pow(1.0 - bu, self.distribution_index + 1.0)
+                delta = 1.0 - pow(b, 1.0 / (self.distribution_index + 1.0))
+
+            x = x + delta*dx
+            x = clip(x, lb, ub)
         return x
     
 class SBX(Variator):
@@ -146,8 +146,9 @@ class SBX(Variator):
                     
     def sbx_crossover(self, x1, x2, lb, ub):
         dx = x2 - x1
+        db = ub - lb
         
-        if dx > EPSILON:
+        if dx > EPSILON and db > EPSILON:
             if x2 > x1:
                 y2 = x2
                 y1 = x1

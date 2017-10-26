@@ -65,9 +65,12 @@ class Real_Normal(Type):
         self.spread = spread
 
     def rand(self):
-        value = float(np.random.normal(self.default_value, self.spread, 1))
-        value = max([value, self.min_value])
-        value = min([value, self.max_value])
+        if spread > 0:
+            value = float(np.random.normal(self.default_value, self.spread, 1))
+            value = max([value, self.min_value])
+            value = min([value, self.max_value])
+        else:
+            value = self.default_value
         return value
 
     def __str__(self):
