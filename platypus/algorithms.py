@@ -63,7 +63,7 @@ class AbstractGeneticAlgorithm(Algorithm):
         self.result = []
         
     def step(self):
-        logger.info("nfe = " + str(self.nfe))
+
         if self.nfe == 0:
             self.initialize()
             self.result = self.population
@@ -761,8 +761,8 @@ class NSGAIII(AbstractGeneticAlgorithm):
         offspring = []
         
         while len(offspring) < self.population_size:
-            parents = self.selector.select(self.variator.arity, self.population)
-            offspring.extend(self.variator.evolve(parents))
+            parents = self.selector.select(self.variator.arity, self.population)  # tournament and kill
+            offspring.extend(self.variator.evolve(parents, self.population_size, self.nfe))  # evolve and mutate
             
         self.evaluate_all(offspring)
         

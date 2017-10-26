@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Platypus.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import, division, print_function
-
+import itertools
 import copy
 import math
 import random
@@ -68,7 +68,6 @@ class PM(Mutation):
         self.distribution_index = distribution_index
         
     def mutate(self, parent):
-        logger.info("mutate")
         child = copy.deepcopy(parent)
         problem = child.problem
         probability = self.probability
@@ -77,15 +76,35 @@ class PM(Mutation):
             probability /= float(len([t for t in problem.types if isinstance(t, Real) or isinstance(t, Real_Normal) or isinstance(t, Real_T)]))
             
         for i in range(len(child.variables)):
-            if isinstance(problem.types[i], Real) or isinstance(problem.types[i], Real_Normal) or isinstance(problem.types[i], Real_T):
+            if isinstance(problem.types[i], Real) or isinstance(problem.types[i], Real_T):
                 if random.uniform(0.0, 1.0) <= probability:
                     child.variables[i] = self.pm_mutation(float(child.variables[i]),
                                                           problem.types[i].min_value,
                                                           problem.types[i].max_value)
 
                     child.evaluated = False
-        
+            if isinstance(problem.types[i], Real_Normal):
+                if random.uniform(0.0, 1.0) <= probability:
+                    try:
+                        if problem.types[i].clamp[generation]:
+                            pass
+                        else:
+                            child.variables[i] = self.pm_mutation(float(child.variables[i]),
+                                                                  problem.types[i].min_value,
+                                                                  problem.types[i].max_value)
+                    except IndexError:
+                        raise IndexError("Failed to mutate, clamp list too short!")
+
+                    child.evaluated = False
+
         return child
+
+    def evolve(self, parents, population_size=None, nfe=None):
+        logger.info("mutate, population_size= " + str(population_size) + " nfe= " + str(nfe))
+        if hasattr(parents, "__iter__"):
+            return list(map(self.mutate, parents))
+        else:
+            return self.mutate(parents)
     
     def pm_mutation(self, x, lb, ub):
         u = random.uniform(0, 1)
@@ -112,8 +131,9 @@ class SBX(Variator):
         self.probability = probability
         self.distribution_index = distribution_index
          
-    def evolve(self, parents):
-        logger.info("evolve")
+    def evolve(self, parents, population_size=None, nfe=None):
+        generation = int(nfe / population_size)
+        logger.info("evolve, population_size= " + str(population_size) + " nfe= " + str(nfe))
         child1 = copy.deepcopy(parents[0])
         child2 = copy.deepcopy(parents[1])
         
@@ -122,7 +142,7 @@ class SBX(Variator):
             nvars = problem.nvars
             
             for i in range(nvars):
-                if isinstance(problem.types[i], Real) or isinstance(problem.types[i], Real_Normal) or isinstance(problem.types[i], Real_T):
+                if isinstance(problem.types[i], Real) or isinstance(problem.types[i], Real_T):
                     if random.uniform(0.0, 1.0) <= 0.5:
                         x1 = float(child1.variables[i])
                         x2 = float(child2.variables[i])
@@ -135,8 +155,29 @@ class SBX(Variator):
                         child2.variables[i] = x2
                         child1.evaluated = False
                         child2.evaluated = False
-            child1.generation += 1
-            child2.generation += 1
+
+                if isinstance(problem.types[i], Real_Normal):
+                    if random.uniform(0.0, 1.0) <= 0.5:
+                        x1 = float(child1.variables[i])
+                        x2 = float(child2.variables[i])
+                        lb = problem.types[i].min_value
+                        ub = problem.types[i].max_value
+                        try:
+                            if problem.types[i].clamp[generation]:
+                                x1 = x1
+                                x2 = x2
+                            else:
+                                x1, x2 = self.sbx_crossover(x1, x2, lb, ub)
+                        except IndexError:
+                            raise IndexError("Failed to evolve, clamp list too short!")
+
+                        child1.variables[i] = x1
+                        child2.variables[i] = x2
+                        child1.evaluated = False
+                        child2.evaluated = False
+
+            child1.generation = generation
+            child2.generation = generation
             child1.parent0 = parents[0].fingerprint
             child1.parent1 = parents[1].fingerprint
             child2.parent1 = parents[0].fingerprint
@@ -197,10 +238,15 @@ class GAOperator(Variator):
         super(GAOperator, self).__init__(variation.arity)
         self.variation = variation
         self.mutation = mutation
-        
-    def evolve(self, parents):
-        return list(map(self.mutation.evolve, self.variation.evolve(parents)))
-    
+
+
+
+    def evolve(self, parents, population_size=None, nfe=None):
+        population_size_iter = itertools.repeat(population_size)
+        nfe_iter = itertools.repeat(nfe)
+
+        return list(map(self.mutation.evolve, self.variation.evolve(parents, population_size=population_size, nfe=nfe), population_size_iter, nfe_iter))
+
 class CompoundMutation(Mutation):
     
     def __init__(self, *mutators):

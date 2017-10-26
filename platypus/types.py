@@ -57,12 +57,13 @@ class Real(Type):
 
 
 class Real_Normal(Type):
-    def __init__(self, min_value, max_value, default_value, spread=5):
+    def __init__(self, min_value, max_value, default_value, spread=5, clamp = None):
         super(Real_Normal, self).__init__()
         self.min_value = float(min_value)
         self.max_value = float(max_value)
         self.default_value = float(default_value)
         self.spread = spread
+        self.clamp = clamp
 
     def rand(self):
         if self.spread > 0:
