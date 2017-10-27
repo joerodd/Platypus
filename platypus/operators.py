@@ -67,7 +67,8 @@ class PM(Mutation):
         self.probability = probability
         self.distribution_index = distribution_index
         
-    def mutate(self, parent):
+    def mutate(self, parent, population_size=None, nfe=None):
+        generation = int(nfe / population_size)
         child = copy.deepcopy(parent)
         problem = child.problem
         probability = self.probability
@@ -104,7 +105,7 @@ class PM(Mutation):
         if hasattr(parents, "__iter__"):
             return list(map(self.mutate, parents))
         else:
-            return self.mutate(parents)
+            return self.mutate(parents, population_size, nfe)
     
     def pm_mutation(self, x, lb, ub):
         u = random.uniform(0, 1)
