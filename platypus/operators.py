@@ -88,8 +88,10 @@ class PM(Mutation):
                 if random.uniform(0.0, 1.0) <= probability:
                     try:
                         if problem.types[i].clamp[generation]:
+                            logger.info("mutate. generation " + str(generation) + ": index" + str(i) + " Clamped")
                             pass
                         else:
+                            logger.info("mutate. generation " + str(generation) + ": index" + str(i) + " not clamped")
                             child.variables[i] = self.pm_mutation(float(child.variables[i]),
                                                                   problem.types[i].min_value,
                                                                   problem.types[i].max_value)
@@ -165,9 +167,11 @@ class SBX(Variator):
                         ub = problem.types[i].max_value
                         try:
                             if problem.types[i].clamp[generation]:
+                                logger.info("evolve. generation " + str(generation) + ": index" + str(i) + " Clamped")
                                 x1 = x1
                                 x2 = x2
                             else:
+                                logger.info("evolve. generation " + str(generation) + ": index" + str(i) + " not clamped")
                                 x1, x2 = self.sbx_crossover(x1, x2, lb, ub)
                         except IndexError:
                             raise IndexError("Failed to evolve, clamp list too short!")
