@@ -443,8 +443,8 @@ class ParetoDominance(Dominance):
         # then use Pareto dominance on the objectives
         dominate1 = False
         dominate2 = False
-        
-        for i in range(problem.nobjs):
+
+        for i in solution1.problem.objective_list[solution1.generation]:
             o1 = solution1.objectives[i]
             o2 = solution2.objectives[i]
             
@@ -497,8 +497,8 @@ class EpsilonDominance(Dominance):
         # then use epsilon dominance on the objectives
         dominate1 = False
         dominate2 = False
-        
-        for i in range(problem.nobjs):
+
+        for i in solution1.problem.objective_list[solution1.generation]:
             o1 = solution1.objectives[i]
             o2 = solution2.objectives[i]
             
@@ -544,7 +544,7 @@ class EpsilonDominance(Dominance):
         dominate1 = False
         dominate2 = False
         
-        for i in range(problem.nobjs):
+        for i in solution1.problem.objective_list[solution1.generation]:
             o1 = solution1.objectives[i]
             o2 = solution2.objectives[i]
             
@@ -570,8 +570,8 @@ class EpsilonDominance(Dominance):
         if not dominate1 and not dominate2:
             dist1 = 0.0
             dist2 = 0.0
-            
-            for i in range(problem.nobjs):
+
+            for i in solution1.problem.objective_list[solution1.generation]:
                 o1 = solution1.objectives[i]
                 o2 = solution2.objectives[i]
             
@@ -925,9 +925,8 @@ def crowding_distance(solutions):
         for solution in solutions:
             solution.crowding_distance = POSITIVE_INFINITY
     else:
-        nobjs = solutions[0].problem.nobjs
-            
-        for i in range(nobjs):
+
+        for i in solutions[0].problem.objective_list[solutions[0].generation]:
             sorted_solutions = sorted(solutions, key=functools.partial(objective_key, index=i))
             min_value = sorted_solutions[0].objectives[i]
             max_value = sorted_solutions[-1].objectives[i]
@@ -1058,24 +1057,26 @@ def normalize(solutions, minimum=None, maximum=None):
     maximum : int list
         The maximum values used to normalize the objectives.
     """
+
     if len(solutions) == 0:
         return
     
     problem = solutions[0].problem
+    target_objective_indexes = problem.objective_list[solution1.generation]
     feasible = [s for s in solutions if s.constraint_violation == 0.0]
     
     if minimum is None or maximum is None:
         if minimum is None:
-            minimum = [min([s.objectives[i] for s in feasible]) for i in range(problem.nobjs)]
+            minimum = [min([s.objectives[i] for s in feasible]) for i in target_objective_indexes]
         
         if maximum is None:
-            maximum = [max([s.objectives[i] for s in feasible]) for i in range(problem.nobjs)]
+            maximum = [max([s.objectives[i] for s in feasible]) for i in target_objective_indexes]
     
-    if any([maximum[i]-minimum[i] < EPSILON for i in range(problem.nobjs)]):
+    if any([maximum[i]-minimum[i] < EPSILON for i in target_objective_indexes]):
         raise PlatypusError("objective with empty range")
 
     for s in feasible:
-        s.normalized_objectives = [(s.objectives[i] - minimum[i]) / (maximum[i] - minimum[i]) for i in range(problem.nobjs)]
+        s.normalized_objectives = [(s.objectives[i] - minimum[i]) / (maximum[i] - minimum[i]) for i in target_objective_indexes]
         
     return minimum, maximum
 
