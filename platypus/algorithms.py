@@ -25,6 +25,8 @@ import random
 import operator
 import itertools
 import functools
+import sqlite3
+import pandas as pd
 from abc import ABCMeta, abstractmethod
 from .core import Algorithm, ParetoDominance, AttributeDominance,\
     AttributeDominance, nondominated_sort, nondominated_prune,\
@@ -769,6 +771,45 @@ class NSGAIII(AbstractGeneticAlgorithm):
         offspring.extend(self.population)
         nondominated_sort(offspring)
         self.population = self._reference_point_truncate(offspring, self.population_size)
+
+class NSGAIII_preseed(NSGAIII):
+    def initialize(self):
+        try:
+            con = sqlite3.connect('results.sqlite')
+            cur = con.cursor()
+            cur.execute("SELECT max(generation) FROM results")
+            max_generation = cur.fetchone()
+            last_complete_generation = max_generation[0] - 1
+
+            e = pd.read_sql_query("SELECT * FROM results WHERE generation == %s" % str(last_complete_generation), con=con)
+
+            con.close()
+
+            keys = self.problem.parameter_grid.keys()
+            objective_names = ['score_syl1', 'score_overlap', 'score_syl2', 'score_x', 'score_e', 'score_f', 'score_y']
+
+            population = []
+
+            for r in e[0:self.population_size-1].iterrows():
+                # logger.info("Reading a solution row from database")
+                row = r[1]
+                solution = Solution(problem=self.problem)
+                solution.variables = [row[param] for param in list(keys)]
+                solution.objectives = [row[objective] for objective in objective_names]
+                solution.evaluated = True
+                solution.generation = int(last_complete_generation)
+                population.append(solution)
+
+            self.nfe = int(self.population_size * last_complete_generation)
+            self.population = population
+            self.evaluate_all(self.population)
+            logger.info("successfully retrieved population")
+        except:
+            logger.info("failed to retrieve population")
+            super(NSGAIII, self).initialize()
+
+        if self.variator is None:
+            self.variator = default_variator(self.problem)
 
 class ParticleSwarm(Algorithm):
     
