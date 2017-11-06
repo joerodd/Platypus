@@ -48,6 +48,10 @@ try:
 except NameError:
     from sets import Set as set
 
+import os
+import glob
+import re
+
 import logging
 logger = logging.getLogger('optimum_logger')
             
