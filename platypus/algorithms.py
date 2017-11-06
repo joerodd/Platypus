@@ -807,7 +807,7 @@ class NSGAIII_preseed(NSGAIII):
                 solution.generation = int(last_complete_generation)
                 population.append(solution)
 
-            self.nfe = int(self.population_size * last_complete_generation)
+            self.nfe = int(self.population_size * max_generation)
             self.population = population
             self.evaluate_all(self.population)
             logger.info("successfully retrieved population")
